@@ -4,8 +4,10 @@ const app = express()
 const port = 3000
 const sqlite3 = require('sqlite3').verbose()
 const db = new sqlite3.Database('./music.db')
+const sql = require('./sql.js')
+
    
-app.use(cors())
+app.use(cors()) //definately need this & app.listen below!
 
 app.listen(port, () => {
   console.log(`sqlite3 music app listening at http://localhost:${port}`)
@@ -13,28 +15,25 @@ app.listen(port, () => {
 
 
 app.get('/', (req, res) => {
-   db.all('SELECT * FROM tblMusos ORDER BY last_name', (err, rows) => {
-      res.send(rows)
+    db.all(sql.getMusos(), (err, rows) => {
+    res.send(rows)
    })
 })
 
 app.post('/', (req, res) => {
-   //initial post test using postman
-   //let muso = [{"id_muso":5,"last_name":"Jagger","other_names":"Mick","id_band":"ROL"}]
-   //res.send(muso)
-   db.run(`INSERT INTO tblMusos (id_muso,last_name,other_names,id_band) VALUES(6,'Richards','Keith','ROL')`)
+   db.run(sql.addMuso())
    res.send('Musician added')
 })
 
 
 app.delete('/', (req, res) => {
-   db.run('DELETE FROM tblMusos WHERE id_muso = 6')
+   db.run(sql.deleteMuso())
    res.send('Musician deleted')
 })
 
 app.put('/', (req, res) => {
-   db.run('UPDATE tblMusos SET other_names = "Viv" WHERE id_muso = 6')
-   res.send('Musician updated')
+   db.run(sql.updateMuso('Viv',6))
+   res.send('Musician Updated')
 })
 
 db.close
